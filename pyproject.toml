@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "qframelesswindow"
+version = "0.3.8"
+description = "A cross-platform frameless window based on pyside6, support Win32, Linux and macOS."
+authors = ["NickT8 <sunny.boat9502@fastmail.com>"]
+license = "LGPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">= 3.10, < 3.12"
+pyside6 = "<=6.4.2"
+pyobjc = { version = "^10.1", platform = "darwin" }
+pycocoa = { version = "^23.12.28", platform = "darwin" }
+pywin32 = {version = "^306", platform = "win32"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
