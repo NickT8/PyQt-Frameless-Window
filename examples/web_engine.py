@@ -3,31 +3,29 @@ import sys
 
 from PySide6.QtWidgets import QApplication, QHBoxLayout
 
-from qframelesswindow import FramelessWindow, TitleBar, StandardTitleBar
+from qframelesswindow import FramelessWindow, StandardTitleBar
 from qframelesswindow.webengine import FramelessWebEngineView
 
 
 class Window(FramelessWindow):
-
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         # change the default title bar if you like
-        self.setTitleBar(StandardTitleBar(self))
+        self.set_title_bar(StandardTitleBar(self))
 
-        self.hBoxLayout = QHBoxLayout(self)
+        self.hbox_layout = QHBoxLayout(self)
 
         # must replace QWebEngineView with FramelessWebEngineView
-        self.webEngine = FramelessWebEngineView(self)
+        self.web_engine = FramelessWebEngineView(self)
 
-        self.hBoxLayout.setContentsMargins(0, self.titleBar.height(), 0, 0)
-        self.hBoxLayout.addWidget(self.webEngine)
+        self.hbox_layout.set_contents_margins(0, self.title_bar.height(), 0, 0)
+        self.hbox_layout.add_widget(self.web_engine)
 
         # load web page
-        self.webEngine.load("https://qfluentwidgets.com/")
+        self.web_engine.load("https://qfluentwidgets.com/")
         self.resize(1200, 800)
 
-        self.titleBar.raise_()
-
+        self.title_bar.raise_()
 
 
 if __name__ == "__main__":
