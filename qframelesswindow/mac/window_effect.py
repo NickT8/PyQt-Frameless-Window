@@ -3,24 +3,25 @@ import Cocoa
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget
 
-from ..utils.mac_utils import getNSWindow
+from ..utils.mac_utils import get_ns_window
 
 
 class QMacCocoaViewContainer(QWidget):
-
     def __init__(self, view, parent=None):
         super().__init__(parent=parent)
-        self.setAttribute(Qt.WA_NativeWindow)
+        self.set_attribute(Qt.WA_NativeWindow)
 
 
 class MacWindowEffect:
-    """ Mac OS window effect """
+    """Mac OS window effect"""
 
     def __init__(self, window):
         self.window = window
 
-    def setAcrylicEffect(self, hWnd, gradientColor="F2F2F230", isEnableShadow=True, animationId=0):
-        """ set acrylic effect for window
+    def set_acrylic_effect(
+        self, hWnd, gradientColor="F2F2F230", isEnableShadow=True, animationId=0
+    ):
+        """set acrylic effect for window
 
         Parameter
         ----------
@@ -36,27 +37,25 @@ class MacWindowEffect:
         animationId: int
             turn on blur animation or not
         """
-        frame = Cocoa.NSMakeRect(
-            0, 0, self.window.width(), self.window.height())
+        frame = Cocoa.NSMakeRect(0, 0, self.window.width(), self.window.height())
         visualEffectView = Cocoa.NSVisualEffectView.new()
         visualEffectView.setAutoresizingMask_(
-            Cocoa.NSViewWidthSizable | Cocoa.NSViewHeightSizable)  # window resizable
+            Cocoa.NSViewWidthSizable | Cocoa.NSViewHeightSizable
+        )  # window resizable
         visualEffectView.setFrame_(frame)
         visualEffectView.setState_(Cocoa.NSVisualEffectStateActive)
 
         # https://developer.apple.com/documentation/appkit/nsvisualeffectmaterial
         visualEffectView.setMaterial_(Cocoa.NSVisualEffectMaterialPopover)
-        visualEffectView.setBlendingMode_(
-            Cocoa.NSVisualEffectBlendingModeBehindWindow)
+        visualEffectView.setBlendingMode_(Cocoa.NSVisualEffectBlendingModeBehindWindow)
 
-        nsWindow = getNSWindow(self.window.winId())
+        nsWindow = get_ns_window(self.window.win_id())
         content = nsWindow.contentView()
         container = QMacCocoaViewContainer(0, self.window)
-        content.addSubview_positioned_relativeTo_(
-            visualEffectView, Cocoa.NSWindowBelow, container)
+        content.addSubview_positioned_relativeTo_(visualEffectView, Cocoa.NSWindowBelow, container)
 
-    def setMicaEffect(self, hWnd, isDarkMode=False, isAlt=False):
-        """ Add mica effect to the window (Win11 only)
+    def set_mica_effect(self, hWnd, isDarkMode=False, isAlt=False):
+        """Add mica effect to the window (Win11 only)
 
         Parameters
         ----------
@@ -69,20 +68,20 @@ class MacWindowEffect:
         isAlt: bool
             whether to use mica alt effect
         """
-        self.setAcrylicEffect(hWnd)
+        self.set_acrylic_effect(hWnd)
 
-    def setAeroEffect(self, hWnd):
-        """ add Aero effect to the window
+    def set_aero_effect(self, hWnd):
+        """add Aero effect to the window
 
         Parameter
         ----------
         hWnd: int or `sip.voidptr`
             Window handle
         """
-        self.setAcrylicEffect(hWnd)
+        self.set_acrylic_effect(hWnd)
 
-    def setTransparentEffect(self, hWnd):
-        """ set transparent effect for window
+    def set_transparent_effect(self, hWnd):
+        """set transparent effect for window
 
         Parameters
         ----------
@@ -91,8 +90,8 @@ class MacWindowEffect:
         """
         pass
 
-    def removeBackgroundEffect(self, hWnd):
-        """ Remove background effect
+    def remove_background_effect(self, hWnd):
+        """Remove background effect
 
         Parameters
         ----------
@@ -101,50 +100,50 @@ class MacWindowEffect:
         """
         pass
 
-    def addShadowEffect(self, hWnd):
-        """ add shadow to window
+    def add_shadow_effect(self, hWnd):
+        """add shadow to window
 
         Parameter
         ----------
         hWnd: int or `sip.voidptr`
             Window handle
         """
-        getNSWindow(hWnd).setHasShadow_(True)
+        get_ns_window(hWnd).setHasShadow_(True)
 
-    def addMenuShadowEffect(self, hWnd):
-        """ add shadow to menu
+    def add_menu_shadow_effect(self, hWnd):
+        """add shadow to menu
 
         Parameter
         ----------
         hWnd: int or `sip.voidptr`
             Window handle
         """
-        self.addShadowEffect(hWnd)
+        self.add_shadow_effect(hWnd)
 
     @staticmethod
-    def removeMenuShadowEffect(hWnd):
-        """ Remove shadow from pop-up menu
+    def remove_menu_shadow_effect(hWnd):
+        """Remove shadow from pop-up menu
 
         Parameters
         ----------
         hWnd: int or `sip.voidptr`
             Window handle
         """
-        getNSWindow(hWnd).setHasShadow_(False)
+        get_ns_window(hWnd).setHasShadow_(False)
 
-    def removeShadowEffect(self, hWnd):
-        """ Remove shadow from the window
+    def remove_shadow_effect(self, hWnd):
+        """Remove shadow from the window
 
         Parameters
         ----------
         hWnd: int or `sip.voidptr`
             Window handle
         """
-        getNSWindow(hWnd).setHasShadow_(False)
+        get_ns_window(hWnd).setHasShadow_(False)
 
     @staticmethod
-    def addWindowAnimation(hWnd):
-        """ Enables the maximize and minimize animation of the window
+    def add_window_animation(hWnd):
+        """Enables the maximize and minimize animation of the window
 
         Parameters
         ----------
@@ -154,8 +153,8 @@ class MacWindowEffect:
         pass
 
     @staticmethod
-    def disableMaximizeButton(hWnd):
-        """ Disable the maximize button of window
+    def disable_maximize_button(hWnd):
+        """Disable the maximize button of window
 
         Parameters
         ----------
@@ -163,8 +162,8 @@ class MacWindowEffect:
             Window handle
         """
 
-    def enableBlurBehindWindow(self, hWnd):
-        """ enable the blur effect behind the whole client
+    def enable_blur_behind_window(self, hWnd):
+        """enable the blur effect behind the whole client
         Parameters
         ----------
         hWnd: int or `sip.voidptr`
