@@ -107,6 +107,6 @@ class LinuxFramelessDialog(LinuxFramelessWindowBase, QDialog):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self._initFrameless()
-        self.titleBar.minBtn.hide()
-        self.titleBar.maxBtn.hide()
-        self.titleBar.setDoubleClickEnabled(False)
+        self.titleBar.min_btn.hide()
+        self.titleBar.max_btn.hide()
+        self.titleBar.set_double_click_enabled(False)

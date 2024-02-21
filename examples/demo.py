@@ -15,20 +15,22 @@ class CustomTitleBar(StandardTitleBar):
         super().__init__(parent)
 
         # customize the style of title bar button
-        self.minBtn.setHoverColor(Qt.white)
-        self.minBtn.setHoverBackgroundColor(QColor(0, 100, 182))
-        self.minBtn.setPressedColor(Qt.white)
-        self.minBtn.setPressedBackgroundColor(QColor(54, 57, 65))
+        self.min_btn.setHoverColor(Qt.white)
+        self.min_btn.setHoverBackgroundColor(QColor(0, 100, 182))
+        self.min_btn.setPressedColor(Qt.white)
+        self.min_btn.setPressedBackgroundColor(QColor(54, 57, 65))
 
         # use qss to customize title bar button
-        self.maxBtn.setStyleSheet("""
+        self.max_btn.setStyleSheet(
+            """
             TitleBarButton {
                 qproperty-hoverColor: white;
                 qproperty-hoverBackgroundColor: rgb(0, 100, 182);
                 qproperty-pressedColor: white;
                 qproperty-pressedBackgroundColor: rgb(54, 57, 65);
             }
-        """)
+        """
+        )
 
 
 class Window(FramelessWindow):
