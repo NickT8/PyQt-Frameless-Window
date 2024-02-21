@@ -6,7 +6,7 @@ from PySide6.QtCore import QEvent, Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QWidget
 
-from ..utils import startSystemMove
+from ..utils import start_system_move
 from .title_bar_buttons import (
     CloseButton,
     MaximizeButton,
@@ -42,7 +42,7 @@ class TitleBarBase(QWidget):
     def eventFilter(self, obj, e):
         if obj is self.window():
             if e.type() == QEvent.WindowStateChange:
-                self.max_btn.setMaxState(self.window().is_maximized())
+                self.max_btn.set_max_state(self.window().is_maximized())
                 return False
 
         return super().event_filter(obj, e)
@@ -58,13 +58,13 @@ class TitleBarBase(QWidget):
         if sys.platform != "win32" or not self.can_drag(e.pos()):
             return
 
-        startSystemMove(self.window(), e.global_pos())
+        start_system_move(self.window(), e.global_pos())
 
     def mouse_press_event(self, e):
         if sys.platform == "win32" or not self.can_drag(e.pos()):
             return
 
-        startSystemMove(self.window(), e.global_pos())
+        start_system_move(self.window(), e.global_pos())
 
     def __toggle_max_state(self):
         """Toggles the maximization state of the window and change icon"""
