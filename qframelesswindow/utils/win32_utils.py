@@ -1,8 +1,8 @@
 # coding:utf-8
-from ctypes import Structure, byref, sizeof, windll, c_int
+import sys
+from ctypes import Structure, byref, c_int, sizeof, windll
 from ctypes.wintypes import DWORD, HWND, LPARAM, RECT, UINT
 from platform import platform
-import sys
 
 import win32api
 import win32con
@@ -11,14 +11,16 @@ import win32print
 from PySide6.QtCore import QOperatingSystemVersion, QVersionNumber
 from PySide6.QtGui import QGuiApplication
 
+from __feature__ import snake_case  # isort: skip  # noqa: F401
+
 
 ABM_GETSTATE = 4
 ABS_AUTOHIDE = 1
 ABM_GETTASKBARPOS = 5
 
 
-def isMaximized(hWnd):
-    """ Determine whether the window is maximized
+def is_maximized(hWnd):
+    """Determine whether the window is maximized
 
     Parameters
     ----------
@@ -32,8 +34,8 @@ def isMaximized(hWnd):
     return windowPlacement[1] == win32con.SW_MAXIMIZE
 
 
-def isFullScreen(hWnd):
-    """ Determine whether the window is full screen
+def is_full_screen(hWnd):
+    """Determine whether the window is full screen
 
     Parameters
     ----------
@@ -48,7 +50,7 @@ def isFullScreen(hWnd):
     if not winRect:
         return False
 
-    monitorInfo = getMonitorInfo(hWnd, win32con.MONITOR_DEFAULTTOPRIMARY)
+    monitorInfo = get_monitor_info(hWnd, win32con.MONITOR_DEFAULTTOPRIMARY)
     if not monitorInfo:
         return False
 
@@ -56,15 +58,15 @@ def isFullScreen(hWnd):
     return all(i == j for i, j in zip(winRect, monitorRect))
 
 
-def isCompositionEnabled():
-    """ detect if dwm composition is enabled """
+def is_composition_enabled():
+    """detect if dwm composition is enabled"""
     bResult = c_int(0)
     windll.dwmapi.DwmIsCompositionEnabled(byref(bResult))
     return bool(bResult.value)
 
 
-def getMonitorInfo(hWnd, dwFlags):
-    """ get monitor info, return `None` if failed
+def get_monitor_info(hWnd, dwFlags):
+    """get monitor info, return `None` if failed
 
     Parameters
     ----------
@@ -81,8 +83,8 @@ def getMonitorInfo(hWnd, dwFlags):
     return win32api.GetMonitorInfo(monitor)
 
 
-def getResizeBorderThickness(hWnd, horizontal=True):
-    """ get resize border thickness of widget
+def get_resize_border_thickness(hWnd, horizontal=True):
+    """get resize border thickness of widget
 
     Parameters
     ----------
@@ -92,31 +94,31 @@ def getResizeBorderThickness(hWnd, horizontal=True):
     dpiScale: bool
         whether to use dpi scale
     """
-    window = findWindow(hWnd)
+    window = find_window(hWnd)
     if not window:
         return 0
 
     frame = win32con.SM_CXSIZEFRAME if horizontal else win32con.SM_CYSIZEFRAME
-    result = getSystemMetrics(hWnd, frame, horizontal) + getSystemMetrics(hWnd, 92, horizontal)
+    result = get_system_metrics(hWnd, frame, horizontal) + get_system_metrics(hWnd, 92, horizontal)
 
     if result > 0:
         return result
 
-    thickness = 8 if isCompositionEnabled() else 4
-    return round(thickness*window.devicePixelRatio())
+    thickness = 8 if is_composition_enabled() else 4
+    return round(thickness * window.device_pixel_ratio())
 
 
-def getSystemMetrics(hWnd, index, horizontal):
-    """ get system metrics """
-    if not hasattr(windll.user32, 'GetSystemMetricsForDpi'):
+def get_system_metrics(hWnd, index, horizontal):
+    """get system metrics"""
+    if not hasattr(windll.user32, "GetSystemMetricsForDpi"):
         return win32api.GetSystemMetrics(index)
 
-    dpi = getDpiForWindow(hWnd, horizontal)
+    dpi = get_dpi_for_window(hWnd, horizontal)
     return windll.user32.GetSystemMetricsForDpi(index, dpi)
 
 
-def getDpiForWindow(hWnd, horizontal=True):
-    """ get dpi for window
+def get_dpi_for_window(hWnd, horizontal=True):
+    """get dpi for window
 
     Parameters
     ----------
@@ -126,7 +128,7 @@ def getDpiForWindow(hWnd, horizontal=True):
     dpiScale: bool
         whether to use dpi scale
     """
-    if hasattr(windll.user32, 'GetDpiForWindow'):
+    if hasattr(windll.user32, "GetDpiForWindow"):
         return windll.user32.GetDpiForWindow(hWnd)
 
     hdc = win32gui.GetDC(hWnd)
@@ -144,8 +146,8 @@ def getDpiForWindow(hWnd, horizontal=True):
     return 96
 
 
-def findWindow(hWnd):
-    """ find window by hWnd, return `None` if not found
+def find_window(hWnd):
+    """find window by hWnd, return `None` if not found
 
     Parameters
     ----------
@@ -155,51 +157,50 @@ def findWindow(hWnd):
     if not hWnd:
         return
 
-    windows = QGuiApplication.topLevelWindows()
+    windows = QGuiApplication.top_level_windows()
     if not windows:
         return
 
     hWnd = int(hWnd)
     for window in windows:
-        if window and int(window.winId()) == hWnd:
+        if window and int(window.win_id()) == hWnd:
             return window
 
 
-def isGreaterEqualWin8_1():
-    """ determine if the windows version ≥ Win8.1 """
+def is_greater_equal_Win8_1():
+    """determine if the windows version ≥ Win8.1"""
     cv = QOperatingSystemVersion.current()
-    cv = QVersionNumber(cv.majorVersion(), cv.minorVersion(), cv.microVersion())
+    cv = QVersionNumber(cv.major_version(), cv.minor_version(), cv.micro_version())
     return cv >= QVersionNumber(8, 1, 0)
 
 
-def isGreaterEqualWin10():
-    """ determine if the windows version ≥ Win10 """
+def is_greater_equal_win10():
+    """determine if the windows version ≥ Win10"""
     return "Windows-10" in platform()
 
 
-def isGreaterEqualWin11():
-    """ determine if the windows version ≥ Win10 """
-    return isGreaterEqualWin10() and sys.getwindowsversion().build >= 22000
+def is_greater_equal_win11():
+    """determine if the windows version ≥ Win10"""
+    return is_greater_equal_win10() and sys.getwindowsversion().build >= 22000
 
 
-def isWin7():
-    """ determine if the windows version is Win7 """
+def is_win7():
+    """determine if the windows version is Win7"""
     return "Windows-7" in platform()
 
 
 class APPBARDATA(Structure):
     _fields_ = [
-        ('cbSize',            DWORD),
-        ('hWnd',              HWND),
-        ('uCallbackMessage',  UINT),
-        ('uEdge',             UINT),
-        ('rc',                RECT),
-        ('lParam',            LPARAM),
+        ("cbSize", DWORD),
+        ("hWnd", HWND),
+        ("uCallbackMessage", UINT),
+        ("uEdge", UINT),
+        ("rc", RECT),
+        ("lParam", LPARAM),
     ]
 
 
 class Taskbar:
-
     LEFT = 0
     TOP = 1
     RIGHT = 2
@@ -209,30 +210,28 @@ class Taskbar:
     AUTO_HIDE_THICKNESS = 2
 
     @staticmethod
-    def isAutoHide():
-        """ detect whether the taskbar is hidden automatically """
-        appbarData = APPBARDATA(sizeof(APPBARDATA), 0,
-                                0, 0, RECT(0, 0, 0, 0), 0)
+    def is_auto_hide():
+        """detect whether the taskbar is hidden automatically"""
+        appbarData = APPBARDATA(sizeof(APPBARDATA), 0, 0, 0, RECT(0, 0, 0, 0), 0)
         taskbarState = windll.shell32.SHAppBarMessage(ABM_GETSTATE, byref(appbarData))
 
         return taskbarState == ABS_AUTOHIDE
 
     @classmethod
-    def getPosition(cls, hWnd):
-        """ get the position of auto-hide task bar
+    def get_position(cls, hWnd):
+        """get the position of auto-hide task bar
 
         Parameters
         ----------
         hWnd: int or `sip.voidptr`
             window handle
         """
-        if isGreaterEqualWin8_1():
-            monitorInfo = getMonitorInfo(
-                hWnd, win32con.MONITOR_DEFAULTTONEAREST)
+        if is_greater_equal_Win8_1():
+            monitorInfo = get_monitor_info(hWnd, win32con.MONITOR_DEFAULTTONEAREST)
             if not monitorInfo:
                 return cls.NO_POSITION
 
-            monitor = RECT(*monitorInfo['Monitor'])
+            monitor = RECT(*monitorInfo["Monitor"])
             appbarData = APPBARDATA(sizeof(APPBARDATA), 0, 0, 0, monitor, 0)
             positions = [cls.LEFT, cls.TOP, cls.RIGHT, cls.BOTTOM]
             for position in positions:
@@ -242,16 +241,22 @@ class Taskbar:
 
             return cls.NO_POSITION
 
-        appbarData = APPBARDATA(sizeof(APPBARDATA), win32gui.FindWindow(
-            "Shell_TrayWnd", None), 0, 0, RECT(0, 0, 0, 0), 0)
+        appbarData = APPBARDATA(
+            sizeof(APPBARDATA),
+            win32gui.FindWindow("Shell_TrayWnd", None),
+            0,
+            0,
+            RECT(0, 0, 0, 0),
+            0,
+        )
         if appbarData.hWnd:
-            windowMonitor = win32api.MonitorFromWindow(
-                hWnd, win32con.MONITOR_DEFAULTTONEAREST)
+            windowMonitor = win32api.MonitorFromWindow(hWnd, win32con.MONITOR_DEFAULTTONEAREST)
             if not windowMonitor:
                 return cls.NO_POSITION
 
             taskbarMonitor = win32api.MonitorFromWindow(
-                appbarData.hWnd, win32con.MONITOR_DEFAULTTOPRIMARY)
+                appbarData.hWnd, win32con.MONITOR_DEFAULTTOPRIMARY
+            )
             if not taskbarMonitor:
                 return cls.NO_POSITION
 
@@ -263,11 +268,11 @@ class Taskbar:
 
 
 class WindowsMoveResize:
-    """ Tool class for moving and resizing Mac OS window """
+    """Tool class for moving and resizing Mac OS window"""
 
     @staticmethod
-    def startSystemMove(window, globalPos):
-        """ resize window
+    def start_system_move(window, globalPos):
+        """resize window
 
         Parameters
         ----------
@@ -279,15 +284,12 @@ class WindowsMoveResize:
         """
         win32gui.ReleaseCapture()
         win32api.SendMessage(
-            int(window.winId()),
-            win32con.WM_SYSCOMMAND,
-            win32con.SC_MOVE | win32con.HTCAPTION,
-            0
+            int(window.win_id()), win32con.WM_SYSCOMMAND, win32con.SC_MOVE | win32con.HTCAPTION, 0
         )
 
     @classmethod
-    def starSystemResize(cls, window, globalPos, edges):
-        """ resize window
+    def star_system_resize(cls, window, globalPos, edges):
+        """resize window
 
         Parameters
         ----------
