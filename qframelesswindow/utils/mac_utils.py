@@ -5,18 +5,21 @@ import Cocoa
 import objc
 from PySide6.QtCore import qVersion
 from PySide6.QtWidgets import QWidget
-from Quartz.CoreGraphics import (CGEventCreateMouseEvent,
-                                 kCGEventLeftMouseDown, kCGMouseButtonLeft)
+from Quartz.CoreGraphics import (
+    CGEventCreateMouseEvent,
+    kCGEventLeftMouseDown,
+    kCGMouseButtonLeft,
+)
 
-QT_VERSION = tuple(int(v) for v in qVersion().split('.'))
+QT_VERSION = tuple(int(v) for v in qVersion().split("."))
 
 
 class MacMoveResize:
-    """ Tool class for moving and resizing Mac OS window """
+    """Tool class for moving and resizing Mac OS window"""
 
     @staticmethod
-    def startSystemMove(window: QWidget, globalPos):
-        """ resize window
+    def start_system_move(window: QWidget, globalPos):
+        """resize window
 
         Parameters
         ----------
@@ -27,14 +30,15 @@ class MacMoveResize:
             the global point of mouse release event
         """
         if QT_VERSION >= (5, 15, 0):
-            window.windowHandle().startSystemMove()
+            window.window_handle().start_system_move()
             return
 
-        nsWindow = getNSWindow(window.winId())
+        nsWindow = get_ns_window(window.win_id())
 
         # send click event
         cgEvent = CGEventCreateMouseEvent(
-            None, kCGEventLeftMouseDown, (globalPos.x(), globalPos.y()), kCGMouseButtonLeft)
+            None, kCGEventLeftMouseDown, (globalPos.x(), globalPos.y()), kCGMouseButtonLeft
+        )
         clickEvent = Cocoa.NSEvent.eventWithCGEvent_(cgEvent)
 
         if clickEvent:
@@ -43,8 +47,8 @@ class MacMoveResize:
         # CFRelease(cgEvent)
 
     @classmethod
-    def starSystemResize(cls, window, globalPos, edges):
-        """ resize window
+    def star_system_resize(cls, window, globalPos, edges):
+        """resize window
 
         Parameters
         ----------
@@ -60,13 +64,13 @@ class MacMoveResize:
         pass
 
 
-def getNSWindow(winId):
-    """ convert window handle to NSWindow
+def get_ns_window(win_id):
+    """convert window handle to NSWindow
 
     Parameters
     ----------
-    winId: int or `sip.voidptr`
+    win_id: int or `sip.voidptr`
         window handle
     """
-    view = objc.objc_object(c_void_p=c_void_p(int(winId)))
+    view = objc.objc_object(c_void_p=c_void_p(int(win_id)))
     return view.window()

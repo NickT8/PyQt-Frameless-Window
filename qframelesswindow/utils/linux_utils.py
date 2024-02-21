@@ -5,11 +5,11 @@ from PySide6.QtWidgets import QApplication
 
 
 class LinuxMoveResize:
-    """ Tool class for moving and resizing window """
+    """Tool class for moving and resizing window"""
 
     @classmethod
-    def startSystemMove(cls, window, globalPos):
-        """ move window
+    def start_system_move(cls, window, globalPos):
+        """move window
 
         Parameters
         ----------
@@ -19,14 +19,15 @@ class LinuxMoveResize:
         globalPos: QPoint
             the global point of mouse release event
         """
-        window.windowHandle().startSystemMove()
-        event = QMouseEvent(QEvent.MouseButtonRelease, QPoint(-1, -1),
-                            Qt.LeftButton, Qt.NoButton, Qt.NoModifier)
-        QApplication.instance().postEvent(window.windowHandle(), event)
+        window.window_handle().start_system_move()
+        event = QMouseEvent(
+            QEvent.MouseButtonRelease, QPoint(-1, -1), Qt.LeftButton, Qt.NoButton, Qt.NoModifier
+        )
+        QApplication.instance().post_event(window.window_handle(), event)
 
     @classmethod
-    def starSystemResize(cls, window, globalPos, edges):
-        """ resize window
+    def star_system_resize(cls, window, globalPos, edges):
+        """resize window
 
         Parameters
         ----------
@@ -42,4 +43,4 @@ class LinuxMoveResize:
         if not edges:
             return
 
-        window.windowHandle().startSystemResize(edges)
+        window.window_handle().start_system_resize(edges)

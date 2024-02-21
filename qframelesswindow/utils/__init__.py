@@ -9,8 +9,8 @@ else:
     from .linux_utils import LinuxMoveResize as MoveResize
 
 
-def startSystemMove(window, globalPos):
-    """ resize window
+def start_system_move(window, globalPos):
+    """resize window
 
     Parameters
     ----------
@@ -20,11 +20,11 @@ def startSystemMove(window, globalPos):
     globalPos: QPoint
         the global point of mouse release event
     """
-    MoveResize.startSystemMove(window, globalPos)
+    MoveResize.start_system_move(window, globalPos)
 
 
-def starSystemResize(window, globalPos, edges):
-    """ resize window
+def star_system_resize(window, globalPos, edges):
+    """resize window
 
     Parameters
     ----------
@@ -37,4 +37,4 @@ def starSystemResize(window, globalPos, edges):
     edges: `Qt.Edges`
         window edges
     """
-    MoveResize.starSystemResize(window, globalPos, edges)
+    MoveResize.star_system_resize(window, globalPos, edges)
