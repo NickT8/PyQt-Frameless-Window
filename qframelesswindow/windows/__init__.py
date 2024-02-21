@@ -6,7 +6,7 @@ import win32con
 import win32gui
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QCursor
-from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMainWindow
+from PySide6.QtWidgets import QApplication, QDialog, QMainWindow, QWidget
 
 from ..titlebar import TitleBar
 from ..utils import win32_utils as win_utils
@@ -14,74 +14,80 @@ from ..utils.win32_utils import Taskbar
 from .c_structures import LPNCCALCSIZE_PARAMS
 from .window_effect import WindowsWindowEffect
 
+from __feature__ import snake_case  # isort: skip  # noqa: F401
+
 
 class WindowsFramelessWindowBase:
-    """ Frameless window base class for Windows system """
+    """Frameless window base class for Windows system"""
 
     BORDER_WIDTH = 5
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _initFrameless(self):
-        self.windowEffect = WindowsWindowEffect(self)
-        self.titleBar = TitleBar(self)
-        self._isResizeEnabled = True
+    def _init_frameless(self):
+        self.window_effect = WindowsWindowEffect(self)
+        self.title_bar = TitleBar(self)
+        self._is_resize_enabled = True
 
-        self.updateFrameless()
+        self.update_frameless()
 
         # solve issue #5
-        self.windowHandle().screenChanged.connect(self.__onScreenChanged)
+        self.window_handle().screenChanged.connect(self.__on_screen_changed)
 
         self.resize(500, 500)
-        self.titleBar.raise_()
+        self.title_bar.raise_()
 
-    def updateFrameless(self):
-        """ update frameless window """
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
+    def update_frameless(self):
+        """update frameless window"""
+        self.set_window_flags(self.window_flags() | Qt.FramelessWindowHint)
 
         # add DWM shadow and window animation
-        self.windowEffect.addWindowAnimation(self.winId())
+        self.window_effect.add_window_animation(self.win_id())
         if not isinstance(self, AcrylicWindow):
-            self.windowEffect.addShadowEffect(self.winId())
+            self.window_effect.add_shadow_effect(self.win_id())
 
-    def setTitleBar(self, titleBar):
-        """ set custom title bar
+    def set_title_bar(self, titleBar):
+        """set custom title bar
 
         Parameters
         ----------
         titleBar: TitleBar
             title bar
         """
-        self.titleBar.deleteLater()
-        self.titleBar.hide()
-        self.titleBar = titleBar
-        self.titleBar.setParent(self)
-        self.titleBar.raise_()
+        self.title_bar.delete_later()
+        self.title_bar.hide()
+        self.title_bar = titleBar
+        self.title_bar.set_parent(self)
+        self.title_bar.raise_()
 
-    def setResizeEnabled(self, isEnabled: bool):
-        """ set whether resizing is enabled """
-        self._isResizeEnabled = isEnabled
+    def set_resize_enabled(self, isEnabled: bool):
+        """set whether resizing is enabled"""
+        self._is_resize_enabled = isEnabled
 
-    def nativeEvent(self, eventType, message):
-        """ Handle the Windows message """
+    def native_event(self, event_type, message):
+        """Handle the Windows message"""
         msg = MSG.from_address(message.__int__())
         if not msg.hWnd:
             return False, 0
 
-        if msg.message == win32con.WM_NCHITTEST and self._isResizeEnabled:
+        if msg.message == win32con.WM_NCHITTEST and self._is_resize_enabled:
             pos = QCursor.pos()
-            xPos = pos.x() - self.x()
-            yPos = pos.y() - self.y()
-            w = self.frameGeometry().width()
-            h = self.frameGeometry().height()
+            x_pos = pos.x() - self.x()
+            y_pos = pos.y() - self.y()
+            w = self.frame_geometry().width()
+            h = self.frame_geometry().height()
 
             # fixes https://github.com/zhiyiYo/PyQt-Frameless-Window/issues/98
-            bw = 0 if win_utils.isMaximized(msg.hWnd) or win_utils.isFullScreen(msg.hWnd) else self.BORDER_WIDTH
-            lx = xPos < bw
-            rx = xPos > w - bw
-            ty = yPos < bw
-            by = yPos > h - bw
+            bw = (
+                0
+                if win_utils.is_maximized(msg.hWnd) or win_utils.is_full_screen(msg.hWnd)
+                else self.BORDER_WIDTH
+            )
+            lx = x_pos < bw
+            rx = x_pos > w - bw
+            ty = y_pos < bw
+            by = y_pos > h - bw
             if lx and ty:
                 return True, win32con.HTTOPLEFT
             elif rx and by:
@@ -104,22 +110,22 @@ class WindowsFramelessWindowBase:
             else:
                 rect = cast(msg.lParam, LPRECT).contents
 
-            isMax = win_utils.isMaximized(msg.hWnd)
-            isFull = win_utils.isFullScreen(msg.hWnd)
+            isMax = win_utils.is_maximized(msg.hWnd)
+            isFull = win_utils.is_full_screen(msg.hWnd)
 
             # adjust the size of client rect
             if isMax and not isFull:
-                ty = win_utils.getResizeBorderThickness(msg.hWnd, False)
+                ty = win_utils.get_resize_border_thickness(msg.hWnd, False)
                 rect.top += ty
                 rect.bottom -= ty
 
-                tx = win_utils.getResizeBorderThickness(msg.hWnd, True)
+                tx = win_utils.get_resize_border_thickness(msg.hWnd, True)
                 rect.left += tx
                 rect.right -= tx
 
             # handle the situation that an auto-hide taskbar is enabled
-            if (isMax or isFull) and Taskbar.isAutoHide():
-                position = Taskbar.getPosition(msg.hWnd)
+            if (isMax or isFull) and Taskbar.is_auto_hide():
+                position = Taskbar.get_position(msg.hWnd)
                 if position == Taskbar.LEFT:
                     rect.top += Taskbar.AUTO_HIDE_THICKNESS
                 elif position == Taskbar.BOTTOM:
@@ -134,63 +140,70 @@ class WindowsFramelessWindowBase:
 
         return False, 0
 
-    def __onScreenChanged(self):
-        hWnd = int(self.windowHandle().winId())
-        win32gui.SetWindowPos(hWnd, None, 0, 0, 0, 0, win32con.SWP_NOMOVE |
-                              win32con.SWP_NOSIZE | win32con.SWP_FRAMECHANGED)
+    def __on_screen_changed(self):
+        hWnd = int(self.window_handle().win_id())
+        win32gui.SetWindowPos(
+            hWnd,
+            None,
+            0,
+            0,
+            0,
+            0,
+            win32con.SWP_NOMOVE | win32con.SWP_NOSIZE | win32con.SWP_FRAMECHANGED,
+        )
 
-    def resizeEvent(self, e):
-        self.titleBar.resize(self.width(), self.titleBar.height())
+    def resize_event(self, e):
+        self.title_bar.resize(self.width(), self.title_bar.height())
 
 
 class WindowsFramelessWindow(WindowsFramelessWindowBase, QWidget):
-    """  Frameless window for Windows system """
+    """Frameless window for Windows system"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self._initFrameless()
+        self._init_frameless()
 
 
 class AcrylicWindow(WindowsFramelessWindow):
-    """ A frameless window with acrylic effect """
+    """A frameless window with acrylic effect"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.__closedByKey = False
 
-    def _initFrameless(self):
-        super()._initFrameless()
-        self.updateFrameless()
+    def _init_frameless(self):
+        super()._init_frameless()
+        self.update_frameless()
 
-        self.setStyleSheet("AcrylicWindow{background:transparent}")
+        self.set_style_sheet("AcrylicWindow{background:transparent}")
 
-    def updateFrameless(self):
-        self.setWindowFlags(Qt.FramelessWindowHint)
+    def update_frameless(self):
+        self.set_window_flags(Qt.FramelessWindowHint)
 
-        self.windowEffect.enableBlurBehindWindow(self.winId())
-        self.windowEffect.addWindowAnimation(self.winId())
+        self.window_effect.enable_blur_behind_window(self.win_id())
+        self.window_effect.add_window_animation(self.win_id())
 
-        self.windowEffect.setAcrylicEffect(self.winId())
-        if win_utils.isGreaterEqualWin11():
-            self.windowEffect.addShadowEffect(self.winId())
+        self.window_effect.set_acrylic_effect(self.win_id())
+        if win_utils.is_greater_equal_win11():
+            self.window_effect.add_shadow_effect(self.win_id())
 
-    def nativeEvent(self, eventType, message):
-        """ Handle the Windows message """
+    def native_event(self, eventType, message):
+        """Handle the Windows message"""
         msg = MSG.from_address(message.__int__())
 
         # handle Alt+F4
         if msg.message == win32con.WM_SYSKEYDOWN:
             if msg.wParam == win32con.VK_F4:
                 self.__closedByKey = True
-                QApplication.sendEvent(self, QCloseEvent())
+                QApplication.send_event(self, QCloseEvent())
                 return False, 0
 
-        return super().nativeEvent(eventType, message)
+        return super().native_event(eventType, message)
 
     def closeEvent(self, e):
-        if not self.__closedByKey or QApplication.quitOnLastWindowClosed():
+        if not self.__closedByKey or QApplication.quit_on_last_window_closed():
             self.__closedByKey = False
-            return super().closeEvent(e)
+            return super().close_event(e)
 
         # system tray icon
         self.__closedByKey = False
@@ -198,20 +211,20 @@ class AcrylicWindow(WindowsFramelessWindow):
 
 
 class WindowsFramelessMainWindow(WindowsFramelessWindowBase, QMainWindow):
-    """ Frameless main window for Windows system """
+    """Frameless main window for Windows system"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self._initFrameless()
+        self._init_frameless()
 
 
 class WindowsFramelessDialog(WindowsFramelessWindowBase, QDialog):
-    """ Frameless dialog for Windows system """
+    """Frameless dialog for Windows system"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self._initFrameless()
-        self.titleBar.min_btn.hide()
-        self.titleBar.max_btn.hide()
-        self.titleBar.set_double_click_enabled(False)
-        self.windowEffect.disableMaximizeButton(self.winId())
+        self._init_frameless()
+        self.title_bar.min_btn.hide()
+        self.title_bar.max_btn.hide()
+        self.title_bar.set_double_click_enabled(False)
+        self.window_effect.disable_maximize_button(self.win_id())
